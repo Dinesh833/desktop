@@ -1,0 +1,107 @@
+#Greeks
+#Delta
+
+def delta(S, K, T, r, q, vol, payoff):
+    
+    d1 = (np.log(S / K) + (r - q + 0.5 * vol ** 2) * T) / (vol * np.sqrt(T))
+    d2 = (np.log(S / K) + (r - q - 0.5 * vol ** 2) * T) / (vol * np.sqrt(T))
+    if payoff == "call":
+        delta = np.exp(- q * T) * si.norm.cdf(d1, 0.0, 1.0)
+    elif payoff == "put":
+        delta =  - np.exp(- q * T) * si.norm.cdf(- d1, 0.0, 1.0)
+    
+    return delta
+S = np.linspace(spt /2, spt *1.7, 75)
+T = np.linspace(0.1, 2, 75)
+Delta = np.zeros((len(T),len(S)))
+for j in range(len(S)):
+    for i in range(len(T)):
+        Delta[i,j] = delta(S[j], stk, T[i], rfr, div, sig, opt)
+fig = plt.figure(figsize=(10, 6))
+ax = fig.gca(projection='3d')
+S, T = np.meshgrid(S, T)
+surf = ax.plot_surface(S, T, Delta, rstride=2, cstride=2, cmap=plt.cm.jet, linewidth=0.5, antialiased=True)
+ax.set_xlabel('Stock Price')
+ax.set_ylabel('Time to Expiry')
+ax.set_zlabel('Delta')
+fig.colorbar(surf, shrink=0.5, aspect=5);
+delval =delta(spt, stk, ttm, rfr, div, sig, opt)
+print('Delta Value =', round(delval ,2))
+
+#Gamma
+
+def gamma(S, K, T, r, q, vol, payoff):
+    
+    d1 = (np.log(S / K) + (r - q + 0.5 * vol ** 2) * T) / (vol * np.sqrt(T))
+    gamma = np.exp(- r * T) * si.norm.pdf(d1, 0.0, 1.0) / (vol * S * np.sqrt(T))
+    
+    return gamma
+S = np.linspace(spt /1.3, spt *1.2, 75)
+T = np.linspace(0.1, 2, 75)
+Gamma = np.zeros((len(T),len(S)))
+for j in range(len(S)):
+    for i in range(len(T)):
+        Gamma[i,j] = gamma(S[j], stk, T[i], rfr, div, sig, opt)
+    fig = plt.figure(figsize=(10, 6))
+ax = fig.gca(projection='3d')
+S, T = np.meshgrid(S, T)
+surf = ax.plot_surface(S, T, Gamma, rstride=2, cstride=2, cmap=plt.cm.jet, linewidth=0.5, antialiased=True)
+ax.set_xlabel('Stock Price')
+ax.set_ylabel('Time to Expiry')
+ax.set_zlabel('Gamma')
+fig.colorbar(surf, shrink=0.5, aspect=5);
+gamval =gamma(spt, stk, ttm, rfr, div, sig, opt)
+print('gamma Value =', round(gamval ,5))
+
+#Theta
+def theta(S, K, T, r, q, vol, payoff):
+    
+    d1 = (np.log(S / K) + (r - q + 0.5 * vol ** 2) * T) / (vol * np.sqrt(T))
+    d2 = (np.log(S / K) + (r - q - 0.5 * vol ** 2) * T) / (vol * np.sqrt(T))
+    if payoff == "call":
+        theta = -(vol * S * np.exp(- q * T) * si.norm.pdf(d1, 0.0, 1.0) / (2 * np.sqrt(T))) + q * S * np.exp(-q * T) * si.norm.cdf(d1, 0.0, 1.0) + r * K * np.exp(-r * T) * si.norm.cdf(d2, 0.0, 1.0)
+    elif payoff == "put":
+        theta = -(vol * S * np.exp(- q * T) * si.norm.pdf(-d1, 0.0, 1.0) / (2 * np.sqrt(T))) + q * S * np.exp(-q * T) * si.norm.cdf(-d1, 0.0, 1.0) + r * K * np.exp(-r * T) * si.norm.cdf(-d2, 0.0, 1.0)
+    
+    return theta
+S = np.linspace(spt /1.3, spt *1.3, 75)
+T = np.linspace(0.1, 2, 75)
+Theta = np.zeros((len(T),len(S)))
+for j in range(len(S)):
+    for i in range(len(T)):
+        Theta[i,j] = theta(S[j], stk, T[i], rfr, div, sig, opt)
+fig = plt.figure(figsize=(10, 6))
+ax = fig.gca(projection='3d')
+S, T = np.meshgrid(S, T)
+surf = ax.plot_surface(S, T, Theta, rstride=2, cstride=2, cmap=plt.cm.jet, linewidth=0.5, antialiased=True)
+ax.set_xlabel('Stock Price')
+ax.set_ylabel('Time to Expiry')
+ax.set_zlabel('Theta')
+fig.colorbar(surf, shrink=0.5, aspect=5);
+
+thetval =theta(spt, stk, ttm, rfr, div, sig, opt)
+print('Theta Value =', round(thetval ,2))
+
+#vega
+def vega(S, K, T, r, q, vol, payoff):
+    
+    d1 = (np.log(S / K) + (r - q + 0.5 * vol ** 2) * T) / (vol * np.sqrt(T))
+    vega = S * np.sqrt(T) * np.exp(-q * T) * si.norm.pdf(d1, 0.0, 1.0)
+    
+    return vega
+S = np.linspace(spt /10, spt *2, 75)
+T = np.linspace(0.1, 2, 75)
+Vega = np.zeros((len(T),len(S)))
+for j in range(len(S)):
+    for i in range(len(T)):
+        Vega[i,j] = vega(S[j], stk, T[i], rfr, div, sig, opt)
+fig = plt.figure(figsize=(10, 6))
+ax = fig.gca(projection='3d')
+S, T = np.meshgrid(S, T)
+surf = ax.plot_surface(S, T, Vega, rstride=2, cstride=2, cmap=plt.cm.jet, linewidth=0.5, antialiased=True)
+ax.set_xlabel('Stock Price')
+ax.set_ylabel('Time to Expiry')
+ax.set_zlabel('Vega   ')
+fig.colorbar(surf, shrink=0.5, aspect=5);
+vegval =vega(spt, stk, ttm, rfr, div, sig, opt)
+print('Vega Value =', round(vegval ,2))
